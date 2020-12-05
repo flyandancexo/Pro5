@@ -96,7 +96,7 @@ void TM1640_matrix ( uint8_t input ){
 		TM1640_led[i]=0 ;
 	  }
 		
-	if(input<63){	
+	if(input<65){	
 	for( uint8_t i=0; i<input; i++){
 		TM1640_led[8+i/8] |= (1<< (7- (i%8)) ) ;
 	}
