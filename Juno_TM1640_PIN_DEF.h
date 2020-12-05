@@ -1,0 +1,11 @@
+//////////////////////////////////////////////////////////////////////////////////
+//  Juno TM1640 LED and KEY Library for AVR MCU 
+//  PINs Definition File
+//  Flyandance 2020 November 15  ||   © All rights reserved.
+//////////////////////////////////////////////////////////////////////////////////
+
+#define TM1640_IO_PORTD
+#define TM1640_IO_PIN 1
+
+#define TM1640_SCK_PORTD
+#define TM1640_SCK_PIN 0
