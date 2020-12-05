@@ -1,4 +1,5 @@
-// LED brightness increases with PWM, and the current is output to right LED.
+// LED brightness increases with PWM, and the measured current is output to right LED.
+// left led is for PWM value.
 
 // 8-bit ADC - Single Conversion Mode
 //ADCSRA - ADC control and status register A
