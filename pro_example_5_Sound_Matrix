@@ -1,0 +1,81 @@
+// left led and 8x8 matrix measure sound level in real time
+// right led records the highest sound level. 8-bit ADC used here, so the range is 0-255
+
+
+// 8-bit ADC - Single Conversion Mode
+//ADCSRA - ADC control and status register A
+#define JUNO_ADC_CLOCK 1   // 1-7;  F_CPU/ 2-4-8-16-32-64-128
+
+//ADMUX - ADC multiplexer selection register
+#define JUNO_ADC_REF 1     // 0-1-3 ; 0=AREF Pin; 1=VCC; 3=Internal 1.1V Voltage Reference
+#define ADC_MODE 1         // 0-1; 0=10-bit mode; 1=8-bit;
+#define JUNO_ADC_CHANNEL 7 // 0-7 ADC channels; 8=Temperature Sensor; 14= 1.1V (VBG); 15=0V (GND);
+
+#define sf 10
+
+//#####################################################################
+
+#include <inttypes.h>
+#include <avr/io.h>
+
+#define F_CPU 8000000UL  // 8 MHz
+#include <util/delay.h>
+
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
+
+#include "Juno_TM1640.h"
+
+volatile uint8_t soundIn;
+	
+int main(void){
+	
+Juno_TM1640_Init(0); 
+
+ADMUX =  (JUNO_ADC_REF<<6) | (ADC_MODE<<5) | JUNO_ADC_CHANNEL;
+ADCSRA = (1<<ADEN) | (1<<ADSC) | (1<<ADIE) | JUNO_ADC_CLOCK;
+sei();
+
+uint8_t soundLevel=0;
+uint8_t soundMax=0;
+volatile uint16_t total=0;
+uint8_t sound[sf];
+uint8_t sin=0;
+	
+	while(1){
+		
+		TM1640_lNum(ADCH);
+		TM1640_rNum(total);
+		
+		TM1640_rNum(soundMax);
+		if(ADCH>soundMax) soundMax=ADCH;
+		
+		if(soundIn==1){
+			total -= sound[sin];
+			sound[sin]=ADCH;
+			total += sound[sin];
+			sin++;
+			if( sin==sf){ sin=0;}
+			
+			soundLevel=total/sf/3;
+			TM1640_matrix(soundLevel);
+			
+			if(total>200*sf) total=0;
+			soundIn=0;
+		}
+	 
+   TM1640_Write_burst(TM1640_led);
+	 	 
+	}//<<while
+	
+}//<<<<main
+
+
+ISR(ADC_vect){
+	soundIn=1;
+	//soundIn = ADCH;   // (176-3)/64=
+	ADCSRA|= (1<<ADSC);
+}
+
+
+
